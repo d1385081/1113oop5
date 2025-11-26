@@ -1,114 +1,137 @@
-public class TicTacToe {
-    private char[][] board;
-    private char currentPlayer;
-    private boolean gameOver;
-    private char winner; // 'X', 'O', or ' ' (no winner yet)
 
+import java.util.ArrayList;
+import java.util.List;
+
+public class TicTacToe {
+
+    private char[][] board; // 井字遊戲盤面 (使用字符陣列儲存)
+    private char player;    // 玩家 (O 或 X)
+    private char currentPlayer; // 目前正在操作的玩家 (O 或 X)
+    private boolean gameEnded; // 遊戲是否結束
+    private int playerTurn; // 目前正在進行的玩家 (0 或 1)
+
+    // 遊戲初始化
     public TicTacToe() {
         board = new char[3][3];
-        reset();
-    }
-
-    // 重設遊戲
-    public void reset() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                board[i][j] = ' ';
+                board[i][j] = '.'; // 初始化盤面為空
             }
         }
-        currentPlayer = 'X';
-        gameOver = false;
-        winner = ' ';
+        player = 'O'; // 初始玩家為 O
+        currentPlayer = 'O'; // 初始玩家為 O
+        gameEnded = false;
+        playerTurn = 0; // 玩家 0 (O) 先先
     }
 
-    // 設定某格（例如 set(0, 2)）
-    public boolean set(int row, int col) {
-        if (gameOver) return false;
-        if (row < 0 || row >= 3 || col < 0 || col >= 3) return false;
-        if (board[row][col] != ' ') return false;
+    // 設定玩家
+    public void setPlayer(char player) {
+        this.player = player;
+    }
 
-        board[row][col] = currentPlayer;
-        evaluate(); // 檢查是否勝利或平手
+    // 設定目前正在操作的玩家
+    public void setCurrentPlayer(char currentPlayer) {
+        this.currentPlayer = currentPlayer;
+    }
 
-        // 若遊戲還沒結束則換人
-        if (!gameOver) {
-            currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+    // 設定玩家輪流設定位置
+    public void setPosition(int row, int col) {
+        if (row >= 0 && row < 3 && col >= 0 && col < 3) {
+            board[row][col] = currentPlayer;
+            if (currentPlayer == 'O') {
+                playerTurn = 1; // 玩家 1 (X) 輪到操作
+            } else {
+                playerTurn = 0; // 玩家 0 (O) 輪到操作
+            }
+        } else {
+            System.out.println("Invalid position. Row and column must be between 0 and 2.");
+        }
+    }
+
+    // 判斷遊戲是否結束
+    public boolean evaluate() {
+        if (gameEnded) {
+            return true; // 遊戲已結束，返回 true
+        }
+
+        // 檢查行
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != '.') {
+                gameEnded = true;
+                return true;
+            }
+        }
+
+        // 檢查列
+        for (int j = 0; j < 3; j++) {
+            if (board[0][j] == board[1][j] && board[1][j] == board[2][j] && board[0][j] != '.') {
+                gameEnded = true;
+                return true;
+            }
+        }
+
+        // 檢查對角線
+        if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != '.') {
+            gameEnded = true;
+            return true;
+        }
+
+        if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != '.') {
+            gameEnded = true;
+            return true;
+        }
+
+        // 檢查平手
+        if (!isBoardFull()) {
+            return false; // 遊戲未結束，繼續檢查
+        }
+
+        gameEnded = true;
+        return true;
+    }
+
+    // 檢查盤面是否已滿
+    private boolean isBoardFull() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == '.') {
+                    return false;
+                }
+            }
         }
         return true;
     }
 
-    // 檢查勝負或平手
-    public void evaluate() {
-        // 檢查列、行、對角線
+    // 顯示盤面
+    public void displayBoard() {
+        System.out.println("------------------");
         for (int i = 0; i < 3; i++) {
-            if (board[i][0] != ' ' &&
-                board[i][0] == board[i][1] &&
-                board[i][1] == board[i][2]) {
-                gameOver = true;
-                winner = board[i][0];
-                return;
-            }
-            if (board[0][i] != ' ' &&
-                board[0][i] == board[1][i] &&
-                board[1][i] == board[2][i]) {
-                gameOver = true;
-                winner = board[0][i];
-                return;
-            }
-        }
-        // 檢查兩條對角線
-        if (board[0][0] != ' ' &&
-            board[0][0] == board[1][1] &&
-            board[1][1] == board[2][2]) {
-            gameOver = true;
-            winner = board[0][0];
-            return;
-        }
-        if (board[0][2] != ' ' &&
-            board[0][2] == board[1][1] &&
-            board[1][1] == board[2][0]) {
-            gameOver = true;
-            winner = board[0][2];
-            return;
-        }
-
-        // 檢查是否平手
-        boolean full = true;
-        for (int i = 0; i < 3; i++) {
+            System.out.print("| ");
             for (int j = 0; j < 3; j++) {
-                if (board[i][j] == ' ') {
-                    full = false;
-                    break;
-                }
+                System.out.print(board[i][j] + " | ");
             }
-        }
-        if (full) {
-            gameOver = true;
-            winner = ' '; // 平手
+            System.out.println();
+            System.out.println("------------------");
         }
     }
 
+    // 取得盤面
+    public char[][] getBoard() {
+        return board;
+    }
+
+    // 取得目前正在操作的玩家
     public char getCurrentPlayer() {
         return currentPlayer;
     }
 
-    public boolean isGameOver() {
-        return gameOver;
+    // 取得遊戲是否結束
+    public boolean isGameEnded() {
+        return gameEnded;
     }
 
-    public char getWinner() {
-        return winner;
-    }
-
-    public char getCell(int row, int col) {
-        return board[row][col];
-    }
-
-    public void printBoard() {
-        System.out.println("-------");
-        for (int i = 0; i < 3; i++) {
-            System.out.println("|" + board[i][0] + "|" + board[i][1] + "|" + board[i][2] + "|");
-        }
-        System.out.println("-------");
+    // 取得目前玩家的輪數
+    public int getPlayerTurn() {
+        return playerTurn;
     }
 }
