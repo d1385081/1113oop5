@@ -1,135 +1,90 @@
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 public class TicTacToe {
 
-    private char[][] board;
-    private char playerTurn; // 'X' or 'O'
-    private int playerNumber; // 1 for X, 2 for O
+    private char[][] board = new char[3][3];
+    private char player = 'X'; // X 先手
+    private boolean gameOver = false;
+    private char winner = ' ';
 
+    // 初始化棋盤
     public TicTacToe() {
-        board = new char[3][3];
-        playerTurn = 'X';
-        playerNumber = 1;
-    }
-
-    public void set(int row, int col) {
-        if (row < 0 || row >= 3 || col < 0 || col >= 3) {
-            throw new IllegalArgumentException("Invalid row or column index.");
-        }
-
-        if (board[row][col] != '\0') {
-            throw new IllegalArgumentException("This position is already occupied.");
-        }
-
-        board[row][col] = playerTurn;
-        playerTurn = (playerTurn == 'X') ? 'O' : 'X';
-    }
-
-    public char getWinner() {
-        // Check rows
         for (int i = 0; i < 3; i++) {
-            if (board[i][0] != '\0' && board[i][0] == board[i][1] && board[i][1] == board[i][2]) {
-                return String.valueOf(board[i][0]);
-            }
+            Arrays.fill(board[i], ' ');
         }
-
-        // Check columns
-        for (int j = 0; j < 3; j++) {
-            if (board[0][j] != '\0' && board[0][j] == board[1][j] && board[1][j] == board[2][j]) {
-                return String.valueOf(board[0][j]);
-            }
-        }
-
-        // Check diagonals
-        if (board[0][0] != '\0' && board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
-            return String.valueOf(board[0][0]);
-        }
-        if (board[0][2] != '\0' && board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
-            return String.valueOf(board[0][2]);
-        }
-
-        return '\0'; // No winner
     }
 
-    public boolean isGameOver() {
-        // Check for a winner
-        if (getWinner() != '\0') {
+    // 下棋
+    public boolean set(int row, int col) {
+        if (row < 0 || row >= 3 || col < 0 || col >= 3) {
+            return false; // 超出範圍
+        }
+
+        if (board[row][col] != ' ') {
+            return false; // 位置已被占用
+        }
+
+        board[row][col] = player;
+
+        // 檢查勝負
+        if (checkWin()) {
+            gameOver = true;
+            winner = player;
             return true;
         }
 
-        // Check for a draw
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (board[i][j] == '\0') {
-                    return false;
-                }
-            }
-        }
-
+        // 輪到下一次玩家
+        player = (player == 'X') ? 'O' : 'X';
         return true;
     }
 
-    public char getBoard() {
-        char[][] boardCopy = new char[3][3];
+    // 勝負判斷
+    private boolean checkWin() {
+        // 檢查三條橫列
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                boardCopy[i][j] = board[i][j];
+            if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != ' ') {
+                return board[i][0] == winner ? true : false;
             }
         }
-        return boardCopy;
-    }
 
-    public static void main(String[] args) {
-        TicTacToe game = new TicTacToe();
-
-        // Test cases
-        System.out.println("Test case 1: X wins");
-        game.set(0, 0);
-        game.set(1, 0);
-        game.set(0, 1);
-        game.set(1, 1);
-        game.set(0, 2);
-        System.out.println("Winner: " + game.getWinner());
-        System.out.println("Game over: " + game.isGameOver());
-
-        System.out.println("\nTest case 2: O wins");
-        game.set(0, 1);
-        game.set(0, 0);
-        game.set(1, 0);
-        game.set(1, 1);
-        game.set(2, 1);
-        game.set(2, 2);
-        System.out.println("Winner: " + game.getWinner());
-        System.out.println("Game over: " + game.isGameOver());
-
-        System.out.println("\nTest case 3: Draw");
-        game.set(0, 0);
-        game.set(0, 1);
-        game.set(0, 2);
-        game.set(1, 1);
-        game.set(1, 0);
-        game.set(1, 2);
-        game.set(2, 1);
-        game.set(2, 0);
-        game.set(2, 2);
-        System.out.println("Winner: " + game.getWinner());
-        System.out.println("Game over: " + game.isGameOver());
-
-        System.out.println("\nTest case 4: Invalid set (same position)");
-        try {
-            game.set(0, 0);
-            game.set(0, 0);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Exception caught: " + e.getMessage());
+        // 檢查三條直行
+        for (int j = 0; j < 3; j++) {
+            if (board[0][j] == board[1][j] && board[1][j] == board[2][j] && board[0][j] != ' ') {
+                return board[0][j] == winner ? true : false;
+            }
         }
 
-        System.out.println("\nTest case 5: Invalid set (out of bounds)");
-        try {
-            game.set(3, 0);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Exception caught: " + e.getMessage());
+        // 檢查主對角線
+        if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != ' ') {
+            return board[0][0] == winner ? true : false;
+        }
+
+        // 檢查副對角線
+        if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != ' ') {
+            return board[0][2] == winner ? true : false;
+        }
+
+        return false;
+    }
+
+    // 檢查遊戲是否結束
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    // 獲取勝者
+    public char getWinner() {
+        return winner;
+    }
+
+    // 顯示棋盤 (可選，用於 debug)
+    public void printBoard() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.println();
         }
     }
 }
