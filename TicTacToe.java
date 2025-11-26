@@ -3,82 +3,90 @@ import java.util.Arrays;
 
 public class TicTacToe {
 
-    private char[][] board = new char[3][3];
-    private char player = 'X'; // X 先手
-    private boolean gameOver = false;
-    private char winner = ' ';
+    private char[][] board;
+    private char player; // 'O' 或 'X'
+    private int currentPlayer; // 玩家輪流 (0 或 1)
+    private boolean gameEnded;
 
-    // 初始化棋盤
     public TicTacToe() {
+        board = new char[3][3];
         for (int i = 0; i < 3; i++) {
-            Arrays.fill(board[i], ' ');
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = '.'; // 初始化為空
+            }
         }
+        player = 'O';
+        currentPlayer = 0; // 初始為 O 的玩家
+        gameEnded = false;
     }
 
-    // 下棋
-    public boolean set(int row, int col) {
-        if (row < 0 || row >= 3 || col < 0 || col >= 3) {
-            return false; // 超出範圍
+    public void setPosition(int row, int col) {
+        if (row < 0 || row > 2 || col < 0 || col > 2) {
+            System.out.println("Invalid position.");
+            return;
         }
 
-        if (board[row][col] != ' ') {
-            return false; // 位置已被占用
+        if (board[row][col] != '.') {
+            System.out.println("Position is already occupied.");
+            return;
         }
 
         board[row][col] = player;
+        if (currentPlayer == 0) {
+            player = 'X';
+        } else {
+            player = 'O';
+        }
+        currentPlayer = 1 - currentPlayer; // 輪到對面玩家
+    }
 
-        // 檢查勝負
-        if (checkWin()) {
-            gameOver = true;
-            winner = player;
+    public boolean isGameEnded() {
+        return gameEnded;
+    }
+
+    public boolean checkWin(int row, int col) {
+        if (row < 0 || row > 2 || col < 0 || col > 2) {
+            return false;
+        }
+
+        if (board[row][col] != '.') {
+            return false;
+        }
+
+        // 檢查水平線
+        if (board[row][col] == board[row][col + 1] && board[row][col] == board[row][col + 2]) {
             return true;
         }
 
-        // 輪到下一次玩家
-        player = (player == 'X') ? 'O' : 'X';
-        return true;
-    }
-
-    // 勝負判斷
-    private boolean checkWin() {
-        // 檢查三條橫列
-        for (int i = 0; i < 3; i++) {
-            if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != ' ') {
-                return board[i][0] == winner ? true : false;
-            }
+        // 檢查垂直線
+        if (board[row][col] == board[row + 1][col] && board[row][col] == board[row + 2][col]) {
+            return true;
         }
 
-        // 檢查三條直行
-        for (int j = 0; j < 3; j++) {
-            if (board[0][j] == board[1][j] && board[1][j] == board[2][j] && board[0][j] != ' ') {
-                return board[0][j] == winner ? true : false;
-            }
+        // 檢查對角線
+        if (board[row][col] == board[row + 1][col + 1] && board[row][col] == board[row + 2][col + 2]) {
+            return true;
         }
 
-        // 檢查主對角線
-        if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != ' ') {
-            return board[0][0] == winner ? true : false;
-        }
-
-        // 檢查副對角線
-        if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != ' ') {
-            return board[0][2] == winner ? true : false;
+        // 檢查對角線
+        if (board[row][col] == board[row + 1][col - 1] && board[row][col] == board[row + 2][col - 2]) {
+            return true;
         }
 
         return false;
     }
 
-    // 檢查遊戲是否結束
-    public boolean isGameOver() {
-        return gameOver;
+    public boolean isBoardFull() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == '.') {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
-    // 獲取勝者
-    public char getWinner() {
-        return winner;
-    }
-
-    // 顯示棋盤 (可選，用於 debug)
     public void printBoard() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -87,4 +95,17 @@ public class TicTacToe {
             System.out.println();
         }
     }
+
+    public void endGame(char winner) {
+        gameEnded = true;
+        if (winner == 'X') {
+            System.out.println("X wins!");
+        } else if (winner == 'O') {
+            System.out.println("O wins!");
+        } else {
+            System.out.println("It's a draw!");
+        }
+    }
 }
+
+// JUnit 測試類別
